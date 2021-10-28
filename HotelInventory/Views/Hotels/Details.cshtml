@@ -28,6 +28,28 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.State)
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HotelRooms)
+        </dt>
+        <dd class="col-sm-10">
+            <table class="table">
+                <tr>
+                    <th>Room Layout</th>
+                    <th> Floor</th>
+                </tr>
+                @foreach(var item in Model.HotelRooms)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Room.Type)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Room.Floor)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </dd>
     </dl>
 </div>
 <div>

@@ -13,6 +13,6 @@ namespace HotelInventory.Models
         public string State { get; set; }
 
         //NAVIGATION
-        public ICollection<Room> Rooms { get; set; }
+        public ICollection<HotelRoom> HotelRooms { get; set; }
     }
 }

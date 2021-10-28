@@ -34,6 +34,9 @@ namespace HotelInventory.Controllers
             }
 
             var hotel = await _context.Hotels
+                .Include(hr => hr.HotelRooms)
+                .ThenInclude(r => r.Room)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (hotel == null)
             {
@@ -54,13 +57,24 @@ namespace HotelInventory.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,City,State")] Hotel hotel)
+        public async Task<IActionResult> Create(
+            [Bind("Name,City,State")] Hotel hotel)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(hotel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(hotel);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment ex variable name and write a log.
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
             }
             return View(hotel);
         }
@@ -117,7 +131,7 @@ namespace HotelInventory.Controllers
         }
 
         // GET: Hotels/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
@@ -125,10 +139,15 @@ namespace HotelInventory.Controllers
             }
 
             var hotel = await _context.Hotels
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (hotel == null)
             {
                 return NotFound();
+            }
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewData["ErrorMessage"] = "Delete Failed, Try Again";
             }
 
             return View(hotel);
@@ -140,9 +159,21 @@ namespace HotelInventory.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var hotel = await _context.Hotels.FindAsync(id);
-            _context.Hotels.Remove(hotel);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if(hotel == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            try
+            {
+                _context.Hotels.Remove(hotel);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment the ex variable and write a log
+                return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
+            }
         }
 
         private bool HotelExists(int id)

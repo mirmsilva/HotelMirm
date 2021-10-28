@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,13 +8,14 @@ namespace HotelInventory.Models
 {
     public class Room
     {
-        public int ID { get; set; }
-        public int HotelID { get; set; }
-        public int AmenityID { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int RoomID { get; set; }
+        public string Type { get; set; }
+        public int Floor { get; set; }
 
 
         //NAVIGATION
-        public Hotel Hotel { get; set; }
-        public Amenity Amenity { get; set; }
+        public ICollection<HotelRoom> HotelRooms { get; set; }
+        //Many-to-many and one-to-many navigation relationships can contain multiple entities. When ICollection<T> is used, EF creates a HashSet<T> collection by default
     }
 }
