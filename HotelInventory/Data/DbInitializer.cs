@@ -57,13 +57,27 @@ namespace HotelInventory.Data
             //AMENITIES
             var amenities = new Amenity[]
             {
-                new Amenity{Type="Microwave"},
-                new Amenity{Type="Coffee Maker"},
-                new Amenity{Type="Fridge"},
+                new Amenity{Type="Microwave", Cost=10},
+                new Amenity{Type="Coffee Maker", Cost=15},
+                new Amenity{Type="Fridge", Cost=5},
             };
             foreach (Amenity a in amenities)
             {
                 context.Amenities.Add(a);
+            }
+            context.SaveChanges();
+
+            //ROOMAMENITIES
+            var roomAmenities = new RoomAmenity[]
+            {
+                new RoomAmenity{
+                    RoomID= rooms.Single(r => r.RoomID ==201).RoomID,
+                    AmenityID=amenities.Single(a =>a.Type == "Microwave").AmenityID},
+                
+            };
+            foreach (RoomAmenity ra in roomAmenities)
+            {
+                context.RoomAmenities.Add(ra);
             }
             context.SaveChanges();
         }

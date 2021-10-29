@@ -17,6 +17,7 @@ namespace HotelInventory.Data
         public DbSet<Room> Rooms { get; set; }
         public DbSet<HotelRoom> HotelRooms { get; set; }
         public DbSet<Amenity> Amenities { get; set; }
+        public DbSet<RoomAmenity> RoomAmenities { get; set; }
         //Room & Amenities could be omitted & would still be acessible because they are referenced in the models
 
 
@@ -27,6 +28,9 @@ namespace HotelInventory.Data
             modelBuilder.Entity<Room>().ToTable("Room");
             modelBuilder.Entity<HotelRoom>().ToTable("HotelRoom");
             modelBuilder.Entity<Amenity>().ToTable("Amenity");
+            modelBuilder.Entity<RoomAmenity>().ToTable("RoomAmenity");
+
+            modelBuilder.Entity<RoomAmenity>().HasKey(ra => new { ra.RoomID, ra.AmenityID });
 
         }
     }

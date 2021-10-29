@@ -20,9 +20,30 @@ namespace HotelInventory.Controllers
         }
 
         // GET: Hotels
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            return View(await _context.Hotels.ToListAsync());
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CitySortParm"] = String.IsNullOrEmpty(sortOrder) ? "city_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+            var hotels = from h in _context.Hotels
+                         select h;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                hotels = hotels.Where(h => h.Name.Contains(searchString) || h.City.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    hotels = hotels.OrderByDescending(h => h.Name);
+                    break;
+                case "city_desc":
+                    hotels = hotels.OrderByDescending(h => h.City);
+                    break;
+                default:
+                    hotels = hotels.OrderBy(h => h.Name);
+                    break;
+            }
+            return View(await hotels.AsNoTracking().ToListAsync());
         }
 
         // GET: Hotels/Details/5

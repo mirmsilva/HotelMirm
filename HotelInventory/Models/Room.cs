@@ -16,6 +16,7 @@ namespace HotelInventory.Models
 
         //NAVIGATION
         public ICollection<HotelRoom> HotelRooms { get; set; }
+        public ICollection<RoomAmenity>RoomAmenities { get; set; }
         //Many-to-many and one-to-many navigation relationships can contain multiple entities. When ICollection<T> is used, EF creates a HashSet<T> collection by default
     }
 }
