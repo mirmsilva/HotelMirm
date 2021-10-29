@@ -17,11 +17,12 @@ namespace HotelInventory.Data
             {
                 return;
             }
-
+            //HOTEL
             var hotels = new Hotel[]
             {
-                new Hotel{ Name="City Explorer", City="Seattle", State="WA"},
-                new Hotel{ Name="Pearl Inn", City="Portland", State="OR"},
+                new Hotel{Name="City Suites", City="Seattle", State="WA"},
+                new Hotel{Name="Pearl Inn", City="Portland", State="OR"},
+                new Hotel{Name="Bay Hotel", City="San Francisco", State="CA"},
             };
             foreach (Hotel h in hotels)
             {
@@ -29,11 +30,36 @@ namespace HotelInventory.Data
             }
             context.SaveChanges();
 
+            //ROOMS
+            var rooms = new Room[]
+            {
+                new Room{RoomID=102, Type="Suite", Floor=2},
+                new Room{RoomID=201, Type="Studio", Floor=3},
+            };
+            foreach (Room r in rooms)
+            {
+                context.Rooms.Add(r);
+            }
+            context.SaveChanges();
+
+            //HOTELROOMS
+            var hotelRooms = new HotelRoom[]
+            {
+                new HotelRoom{HotelID=1, RoomID=201},
+                new HotelRoom{HotelID=2, RoomID=102},
+            };
+            foreach(HotelRoom hr in hotelRooms)
+            {
+                context.HotelRooms.Add(hr);
+            }
+            context.SaveChanges();
+
+            //AMENITIES
             var amenities = new Amenity[]
             {
-                new Amenity{ID=1, Type = "Microwave" },
-                new Amenity{ID=2, Type = "Coffee Maker" },
-                new Amenity{ID=3, Type = "Fridge" },
+                new Amenity{Type="Microwave", Cost=10},
+                new Amenity{Type="Coffee Maker", Cost=15},
+                new Amenity{Type="Fridge", Cost=5},
             };
             foreach (Amenity a in amenities)
             {
@@ -41,16 +67,17 @@ namespace HotelInventory.Data
             }
             context.SaveChanges();
 
-            var rooms = new Room[]
+            //ROOMAMENITIES
+            var roomAmenities = new RoomAmenity[]
             {
-                new Room{HotelID=1, AmenityID=1},
-                new Room{HotelID=1, AmenityID=2},
-                new Room{HotelID=2, AmenityID=1},
-                new Room{HotelID=2, AmenityID=3},
+                new RoomAmenity{
+                    RoomID= rooms.Single(r => r.RoomID ==201).RoomID,
+                    AmenityID=amenities.Single(a =>a.Type == "Microwave").AmenityID},
+                
             };
-            foreach (Room r in rooms)
+            foreach (RoomAmenity ra in roomAmenities)
             {
-                context.Rooms.Add(r);
+                context.RoomAmenities.Add(ra);
             }
             context.SaveChanges();
         }

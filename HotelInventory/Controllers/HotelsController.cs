@@ -20,9 +20,30 @@ namespace HotelInventory.Controllers
         }
 
         // GET: Hotels
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            return View(await _context.Hotels.ToListAsync());
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CitySortParm"] = String.IsNullOrEmpty(sortOrder) ? "city_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+            var hotels = from h in _context.Hotels
+                         select h;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                hotels = hotels.Where(h => h.Name.Contains(searchString) || h.City.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    hotels = hotels.OrderByDescending(h => h.Name);
+                    break;
+                case "city_desc":
+                    hotels = hotels.OrderByDescending(h => h.City);
+                    break;
+                default:
+                    hotels = hotels.OrderBy(h => h.Name);
+                    break;
+            }
+            return View(await hotels.AsNoTracking().ToListAsync());
         }
 
         // GET: Hotels/Details/5
@@ -34,6 +55,9 @@ namespace HotelInventory.Controllers
             }
 
             var hotel = await _context.Hotels
+                .Include(hr => hr.HotelRooms)
+                .ThenInclude(r => r.Room)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (hotel == null)
             {
@@ -54,13 +78,24 @@ namespace HotelInventory.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,City,State")] Hotel hotel)
+        public async Task<IActionResult> Create(
+            [Bind("Name,City,State")] Hotel hotel)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(hotel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(hotel);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment ex variable name and write a log.
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
             }
             return View(hotel);
         }
@@ -117,7 +152,7 @@ namespace HotelInventory.Controllers
         }
 
         // GET: Hotels/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
@@ -125,10 +160,15 @@ namespace HotelInventory.Controllers
             }
 
             var hotel = await _context.Hotels
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (hotel == null)
             {
                 return NotFound();
+            }
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewData["ErrorMessage"] = "Delete Failed, Try Again";
             }
 
             return View(hotel);
@@ -140,9 +180,21 @@ namespace HotelInventory.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var hotel = await _context.Hotels.FindAsync(id);
-            _context.Hotels.Remove(hotel);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if(hotel == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            try
+            {
+                _context.Hotels.Remove(hotel);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment the ex variable and write a log
+                return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
+            }
         }
 
         private bool HotelExists(int id)
