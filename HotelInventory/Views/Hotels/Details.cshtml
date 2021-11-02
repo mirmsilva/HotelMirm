@@ -34,12 +34,16 @@
         <dd class="col-sm-10">
             <table class="table">
                 <tr>
+                    <th>Room ID</th>
                     <th>Room Layout</th>
-                    <th> Floor</th>
+                    <th>Floor</th>
                 </tr>
                 @foreach(var item in Model.HotelRooms)
                 {
                     <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Room.RoomID)
+                        </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Room.Type)
                         </td>
