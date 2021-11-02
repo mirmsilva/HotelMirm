@@ -12,11 +12,13 @@ namespace HotelInventory.Models
         public int RoomID { get; set; }
         public string Type { get; set; }
         public int Floor { get; set; }
+        public int AmenityID { get; set; }
 
 
         //NAVIGATION
         public ICollection<HotelRoom> HotelRooms { get; set; }
         public ICollection<RoomAmenity>RoomAmenities { get; set; }
+        //public Amenity Amenity { get; set; }
         //Many-to-many and one-to-many navigation relationships can contain multiple entities. When ICollection<T> is used, EF creates a HashSet<T> collection by default
     }
 }
